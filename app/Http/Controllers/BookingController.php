@@ -122,7 +122,7 @@ class BookingController extends Controller
 
         return response([
             'message' => 'Booking list all',
-            'data' => $listbooking
+            'booking all' => $listbooking
         ]);
     }
 

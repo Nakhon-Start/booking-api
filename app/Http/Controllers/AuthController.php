@@ -52,8 +52,8 @@ class AuthController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
         return response([
             'token' => $token,
-            'token type' => 'Bearer',
-        ]);
+            'token type' => 'Bearer'
+        ], 200);
 
     }
 
@@ -77,7 +77,7 @@ class AuthController extends Controller
         }
 
         return response()->json([
-            'message' => 'view lisuser Success',
+            'message' => 'view listuser Success',
             user::all()
         ]);
     }

@@ -22,9 +22,13 @@ class RoomController extends Controller
             'description' => 'required|string|max:255',
             'building_id' => 'required|integer'
         ]);
+
+
         $is_checker = Responsibilities::where('user_id', '=', Auth::user()->id)
             ->where('building_id', '=', $request['building_id'])
             ->first();
+
+
         if ($is_checker == null)
             return throw new Exception('Unauthenticated.');
 
@@ -51,7 +55,7 @@ class RoomController extends Controller
                 'user' => $data
             ], 200);
         } else {
-            return response()->json(['message' => 'Not view Room !', 'data' => $data], 404);
+            return response()->json(['message' => 'Not view Room !'], 404);
         }
     }
 
@@ -124,7 +128,7 @@ class RoomController extends Controller
 
         return Booking::with('room')
             ->where('room_id', '=', $request['room_id'])
-            ->select('id', 'booker_id', 'start_date', 'end_date', 'booking_status', 'room_id')
+            ->select('id','booker_id', 'start_date', 'end_date', 'booking_status' , 'room_id')
             ->get();
     }
 
@@ -136,13 +140,19 @@ class RoomController extends Controller
 
             'start_date' => 'required|date_format:"Y-m-d"',
             'end_date' => 'required|date_format:"Y-m-d"',
+            'booking_status' => 'required|int|min:-2|max:1'
+
 
         ]);
+
 
         return Booking::with('room')
             ->where('start_date', '>=', $request['start_date'])
             ->where('end_date', '<=', $request['end_date'])
-            ->select('id', 'booker_id', 'start_date', 'end_date', 'booking_status', 'room_id')
+            ->where('booking_status', '=', $request['booking_status'])
+            ->select('id', 'booker_id', 'start_date', 'end_date', 'booking_status' , 'room_id')
             ->get();
+
+
     }
 }

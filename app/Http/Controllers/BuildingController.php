@@ -39,12 +39,13 @@ class BuildingController extends Controller
 
         if ($data) {
             return response()->json([
-                'message' => 'view Building Success !','data' => $data
+                'message' => 'view Building Success !', $data
             ], 200);
         } else {
             return response()->json(['message' => 'Not view Building !'], 404);
         }
     }
+
     public function GetBuilding($id)  // ดูตัวเดียว
     {
 
