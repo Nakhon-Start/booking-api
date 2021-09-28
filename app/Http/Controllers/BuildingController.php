@@ -30,35 +30,23 @@ class BuildingController extends Controller
 
         return response()->json([
             'Building' => $building
-        ] , 200);
+        ], 200);
     }
 
-    public function GetListBuilding() // ดูรวม
+    public function GetListBuilding()
     {
-        $data = Building::with(['room'])->get();
-
-        if ($data) {
-            return response()->json([
-                'message' => 'view Building Success !', $data
-            ], 200);
-        } else {
-            return response()->json(['message' => 'Not view Building !'], 404);
-        }
+        return Building::with('room')->latest('id')->get();
     }
 
-    public function GetBuilding($id)  // ดูตัวเดียว
+    public function GetBuilding(Request $request)
     {
+        $request->validate([
 
-        $data = Building::find($id);
+            'building_id' => 'required|integer',
+        ]);
+        
+        return Building::with('room')->where('id' ,'=', $request['building_id'])->get();
 
-        if ($data) {
-            return response()->json([
-                'message' => 'view Building Success !',
-                'user' => $data
-            ], 200);
-        } else {
-            return response()->json(['message' => 'Not view Building !'], 404);
-        }
     }
 
     public function SetBuilding(Request $request)
@@ -71,7 +59,7 @@ class BuildingController extends Controller
             'id' => 'required',
             'name' => 'required|string|max:64|unique:building',
             'description' => 'required|string|max:255',
-            'is_active' => 'required|boolean',
+            'is_active' => 'required|integer',
         ]);
 
         $id = $request['id'];
@@ -87,7 +75,7 @@ class BuildingController extends Controller
         ]);
 
         return response()->json([
-            
+
             'Building' => $building,
         ]);
     }

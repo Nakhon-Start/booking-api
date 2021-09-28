@@ -11,14 +11,13 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     use HasFactory, Notifiable, HasApiTokens;
-    public $timestamps = false;
+    public $timestamps = true;
     protected $fillable = [
         'name',
         'email',
         'password',
         'is_admin',
-        'is_checker',
-        'is_active'
+        'is_active' 
     ];
 
     protected $hidden = [
@@ -27,6 +26,9 @@ class User extends Authenticatable
     ];
 
     protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];  
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
+
+    ]; 
+
 }

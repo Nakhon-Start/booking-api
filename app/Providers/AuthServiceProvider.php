@@ -33,7 +33,5 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('is_checker' , function (){
             return Auth::user()->is_checker;
         });
-
-        //
     }
 }

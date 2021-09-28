@@ -18,8 +18,10 @@ class CreateRoomsTable extends Migration
             $table->string('name');
             $table->string('description');
             $table->boolean('is_active')->default(1);
+            $table->string('room_type');
             $table->string('create_by');
             $table->integer('building_id');
+            $table->integer('quantity');
             $table->timestamps();
         });
     }

@@ -8,26 +8,24 @@ use Illuminate\Http\Request;
 use App\Models\Room;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\DB;
+
 
 class RoomController extends Controller
 {
 
     public function CreateRoom(Request $request)
     {
-
         $request->validate([
             'name' => 'required|string|max:64',
             'description' => 'required|string|max:255',
-            'building_id' => 'required|integer'
+            'building_id' => 'required|integer',
+            'room_type' => 'required|string',
+            'quantity' => 'required|integer'
         ]);
-
 
         $is_checker = Responsibilities::where('user_id', '=', Auth::user()->id)
             ->where('building_id', '=', $request['building_id'])
             ->first();
-
 
         if ($is_checker == null)
             return throw new Exception('Unauthenticated.');
@@ -36,6 +34,8 @@ class RoomController extends Controller
             'name' => $request['name'],
             'description' => $request['description'],
             'building_id' => $request['building_id'],
+            'room_type' => $request['room_type'],
+            'quantity' => $request['quantity'],
             'create_by' => Auth::user()->id
         ]);
 
@@ -55,28 +55,20 @@ class RoomController extends Controller
                 'user' => $data
             ], 200);
         } else {
-            return response()->json(['message' => 'Not view Room !'], 404);
+            return response()->json(['message' => 'Room not found !'], 404);
         }
     }
 
     public function GetListRoom()
     {
-        $data = Room::with(['building'])->get();
-
-        if ($data) {
-            return response()->json([
-                'message' => 'view Room Success !', 'data' => $data
-            ], 200);
-        } else {
-            return response()->json(['message' => 'Not view Room !'], 404);
-        }
+        return Room::with(['building', 'user'])->latest('id')->get();
     }
 
 
     public function SetRoom(Request $request)
     {
-
         $is_checker = Room::find($request['id']);
+
         if ($is_checker == null)
             throw new Exception('invalid setRoom');
 
@@ -86,18 +78,20 @@ class RoomController extends Controller
 
 
         $this->validate($request, [
-            'id' => 'required',
+            'id' => 'required|integer',
             'name' => 'required|string|max:64|unique:building',
             'description' => 'required|string|max:255',
             'is_active' => 'required|boolean',
-
+            'room_type' => 'required|string',
+            'quantity' => 'required|integer'
         ]);
-
 
         $is_checker->update([
             'name' => $request['name'],
             'description' => $request['description'],
             'is_active' => $request['is_active'],
+            'room_type' => $request['room_type'],
+            'quantity' => $request['quantity'],
             'create_by' => Auth::user()->id
 
         ]);
@@ -116,43 +110,85 @@ class RoomController extends Controller
         return count($resp) > 0;
     }
 
-
     public function GetRoomListBooking(Request $request)
+    {
+
+        $request->validate([
+            'room_id' => 'required|integer',
+        ]);
+
+        return Booking::with('room')
+            ->where('room_id', '=', $request['room_id'])
+            ->select(
+                'id',
+                'booker_id',
+                'start_date',
+                'end_date',
+                'booking_status',
+                'room_id',
+            )
+            ->get();
+    }
+    public function SearchForRoomsByTime(Request $request)
+    {
+        $request->validate([
+
+            'start_date' => 'required|date_format:"Y-m-d"',
+            'end_date' => 'required|date_format:"Y-m-d"',
+
+        ]);
+
+        $data = Booking::with('room')
+            ->where('start_date', '>=', $request['start_date'])
+            ->where('end_date', '<=', $request['end_date'])
+            ->where('booking_status', '!=', '1')
+            ->select(
+                'id',
+                'booker_note',
+                'start_date',
+                'end_date',
+                'booking_status',
+                'room_id',
+            )
+            ->get();
+
+
+        return response()->json($data);
+    }
+
+    public function SearchForAvailableRoom(Request $request)
     {
 
         $request->validate([
 
             'room_id' => 'required|integer',
-
         ]);
 
-        return Booking::with('room')
+        $data = Booking::with('room')
             ->where('room_id', '=', $request['room_id'])
-            ->select('id','booker_id', 'start_date', 'end_date', 'booking_status' , 'room_id')
+            ->where('booking_status', '=', '1')
+            ->select('id', 'booker_note', 'start_date', 'end_date', 'room_id')
             ->get();
-    }
 
+
+        return response()->json($data);
+    }
 
     public function GetRoomListBookingByDate(Request $request)
     {
-
         $request->validate([
-
             'start_date' => 'required|date_format:"Y-m-d"',
             'end_date' => 'required|date_format:"Y-m-d"',
             'booking_status' => 'required|int|min:-2|max:1'
-
-
         ]);
 
-
-        return Booking::with('room')
+        $data = Booking::with('room')
             ->where('start_date', '>=', $request['start_date'])
             ->where('end_date', '<=', $request['end_date'])
             ->where('booking_status', '=', $request['booking_status'])
-            ->select('id', 'booker_id', 'start_date', 'end_date', 'booking_status' , 'room_id')
+            ->select('id', 'booker_id', 'start_date', 'end_date', 'booking_status', 'room_id')
             ->get();
 
-
+        return response()->json(['data' => $data]);
     }
 }

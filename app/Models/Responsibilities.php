@@ -21,4 +21,10 @@ class Responsibilities extends Model
     public function building(){
         return $this->belongsTo(Building::class , 'building_id' , 'id');
     }
+
+    protected $casts = [
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
+
+    ];
 }

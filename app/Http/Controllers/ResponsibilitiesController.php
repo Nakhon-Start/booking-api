@@ -15,7 +15,14 @@ use Illuminate\Support\Facades\Gate;
 class ResponsibilitiesController extends Controller
 {
 
-    public function CreateResponsibilities(Request $request )
+    public function getResponsibilities()
+    {
+        return Responsibilities::where('user_id', '=', Auth::user()->id)
+        ->select('id','user_id','building_id')
+        ->get();
+    }
+    
+    public function CreateResponsibilities(Request $request)
     {
 
         if (!Gate::allows('is_admin')) {
@@ -26,13 +33,13 @@ class ResponsibilitiesController extends Controller
 
             'building_id' => 'required|integer',
             'user_id' => 'required|integer'
-        
+
         ]);
 
         $checker = Responsibilities::create([
             'user_id' => $request['user_id'],
             'building_id' => $request['building_id'],
-        
+
         ]);
 
         return response()->json([
@@ -41,7 +48,14 @@ class ResponsibilitiesController extends Controller
         ], 200);
     }
 
-    public function GetCheckerFromBuildingID(Request $request){
+    public function GetChecker()
+    {
+        return Responsibilities::with('checker','building')->get();
+
+    }
+
+    public function GetCheckerFromBuildingID(Request $request)
+    {
 
         if (!Gate::allows('is_admin')) {
             throw new Exception("Unauthenticated.");
@@ -51,49 +65,37 @@ class ResponsibilitiesController extends Controller
 
             'building_id' => 'required|integer'
         ]);
-        
-        $building_id = $request['building_id'];
-        
-        
-        return Responsibilities::with('checker')
-        ->where('building_id' , '=' , $building_id)
-        ->select('user_id' )   
-        ->get();
 
+        $building_id = $request['building_id'];
+
+        return Responsibilities::with('checker')
+            ->where('building_id', '=', $building_id)
+            ->select('user_id')
+            ->get();
     }
 
-    public function GetBuildingFormUserID(Request $request){
-
-
-        // เฉพาะ แอดมิน 
-
+    public function GetBuildingFormUserID(Request $request)
+    {
         if (!Gate::allows('is_admin')) {
             throw new Exception("Unauthenticated.");
         }
-
 
         $request->validate([
 
             'user_id' => 'required|integer'
         ]);
 
-        
         return Responsibilities::with('building')
-        ->where('user_id' , '=' , $request['user_id'])
-        ->select('building_id' )   
-        ->get();
-
+            ->where('user_id', '=', $request['user_id'])
+            ->select('building_id')
+            ->get();
     }
 
-    public function GetBuildingFormCheckerID(){
-
-       // ตรวจสอบสิทธิ์การดูแลด้วยตนเอง  
-
-        return Responsibilities::with('building')
-        ->where('user_id' , '=' , Auth::user()->id)
-        ->select('building_id' )   
-        ->get();
-
+    public function GetBuildingFormCheckerID()
+    {
+            return Responsibilities::with('building')
+            ->where('user_id', '=', Auth::user()->id)
+            ->select('building_id')
+            ->get();
     }
 }
-

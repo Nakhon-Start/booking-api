@@ -5,9 +5,8 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use PhpParser\Node\Expr\FuncCall;
 use Exception;
-use App\Models\Responsibility;
+
 
 class AuthController extends Controller
 {
@@ -24,7 +23,7 @@ class AuthController extends Controller
         if($validatedData['password'] != $validatedData['password_confirm']){
             return response()->json([
                 'message' => 'Password not match'
-            ]);
+            ] , 400 );
         }
 
         $user = User::create([
@@ -57,7 +56,7 @@ class AuthController extends Controller
 
     }
 
-    public function User(Request $request)
+    public function User()
     {
         return Auth::user();
     }
@@ -76,13 +75,8 @@ class AuthController extends Controller
             throw new Exception("Unauthenticated.");
         }
 
-        return response()->json([
-            'message' => 'view listuser Success',
-            user::all()
-        ]);
+        return user::all();
     }
-
-
 
     public function GetUser($id)
     {    
@@ -98,29 +92,26 @@ class AuthController extends Controller
                 'user' => $user
             ]);
         } else {
-            return response()->json(['message' => 'No User !']);
+            return response()->json(['message' => 'User not found !']);
         }
     }
 
 
     public function SetUser(Request $request)  
     {
-
         if (!Gate::allows('is_admin')) {
             throw new Exception("Unauthenticated.");
         }
 
         $request->validate([
-            'id' => 'required|int',
+            'id' => 'required|integer',
             'name' => 'string|max:255',
-            'is_admin' => 'boolean',
-            'is_active' => 'boolean',
+            'is_admin' => 'required|boolean',
+            'is_active' => 'required|boolean',
         ]);
 
 
         $id = $request['id'];
-
-        //return response()->json(['message' => $request['is_admin']]);
 
         $user = user::find($id);
         if ($user) {
@@ -131,7 +122,7 @@ class AuthController extends Controller
                 if ($request['is_admin'] == 0)
                     $user->is_admin = 0;
                 else  $user->is_admin = 1;
-            }   /// เงื่อนไขต้องใช้ใน put ปรับเปลี่ยนเอา
+            } 
 
             if ($request['is_active'] != null) {
                 if ($request['is_active'] == 0)
@@ -140,10 +131,7 @@ class AuthController extends Controller
             }
 
             $user->update();
-
             return response()->json([
-                'message' => 'Update Access !',
-                'edit by admin email' => Auth::user()->email,
                 'user' => $user
             ], 200);
 

@@ -12,6 +12,7 @@ class Building extends Model
     protected $table = 'building';
     public $timestamps = true;
     protected $fillable = [
+        'id',
         'name',
         'description',
         'is_active',
@@ -27,4 +28,10 @@ class Building extends Model
     {
         return $this->hasMany(Responsibilities::class);
     }
+
+    protected $casts = [
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
+
+    ];
 }

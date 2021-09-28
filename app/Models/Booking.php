@@ -11,6 +11,7 @@ class Booking extends Model
     public $table = 'booking';
     public $timestamps = true;
     protected $fillable = [
+        'id',
         'booker_id',
         'checker_id',
         'room_id',
@@ -25,5 +26,20 @@ class Booking extends Model
     {
         return $this->belongsTo(Room::class , 'room_id' , 'id');
     }
-    
+
+    public function user()
+    {
+        return $this->belongsTo(User::class , 'booker_id' , 'id');
+    }
+
+    public function checker()
+    {
+        return $this->belongsTo(User::class , 'checker_id' , 'id');
+    }
+    protected $casts = [
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
+
+    ];
+
 }
