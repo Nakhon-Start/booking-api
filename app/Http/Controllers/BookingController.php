@@ -47,32 +47,10 @@ class BookingController extends Controller
     {
 
         $user_id = Auth::user()->id;
-
-        $building_ids = DB::table('booking')
-            ->join('rooms', 'booking.room_id', '=', 'rooms.id')
-            ->select('building_id')
-            ->where('booker_id', '=', $user_id)
-            ->get()
-            ->pluck('building_id');
-
-        if ($this->is_checker($building_ids, $user_id) != 0) {
-            return Booking::with('room', 'user')->where('checker_id', '=', $user_id)->latest('id')->get();
-        }
+    
+        return Booking::with('room', 'user')->where('checker_id', '=', $user_id)->latest('id')->get();
     }
 
-    public function checkerApprove()
-    {
-        $user_id = Auth::user()->id;
-
-
-        //$building_ids = Booking::with('room')->get();
-
-        $building_ids = DB::table('booking')
-            ->join('rooms', 'booking.room_id', '=', 'rooms.id')
-            ->latest('booking.id')
-            ->get();
-        return $building_ids;
-    }
 
     public function bookerHistory()
     {
@@ -82,7 +60,6 @@ class BookingController extends Controller
 
         return  $bookings;
     }
-
 
     public function Approve(Request $request)
     {
@@ -101,7 +78,6 @@ class BookingController extends Controller
         if ($this->is_checker(array($booking->room->building->id), Auth::user()->id) == 0)
             throw new Exception('Unauthenticated.');
 
-        //Auth::user()->is_checker;
         $booking->booking_status = 1;
         $booking->checker_note = $request['accepted_note'];
         $booking->checker_id = Auth::user()->id;
@@ -116,11 +92,11 @@ class BookingController extends Controller
             });
         $booking_rejected->update(['booking_status' => 0, 'checker_id' => Auth::user()->id, 'checker_note' => $request['rejected_note']]);
         return response([
-            //'resp' => $resp,
             'accepted' => $booking,
             'rejected' => $booking_rejected->get()
         ]);
     }
+
     public function is_checker($building_id, $user_id)
     {
         $resp = Responsibilities::whereIn('building_id',  $building_id)
@@ -128,7 +104,6 @@ class BookingController extends Controller
             ->get();
         return count($resp) > 0;
     }
-
 
     public function ShowListBooking()
     {

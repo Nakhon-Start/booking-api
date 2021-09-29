@@ -37,7 +37,7 @@ Route::get('/getbooking/{id}', [BookingController::class, 'ShowBooking']);
 
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/checkerApprove', [BookingController::class, 'checkerApprove']);
+    Route::post('/checkerApprove', [BookingController::class, 'checkinglistBooking']);
     Route::get('/onlineUser', [AccessTokensController::class, 'onlineUser']);
     Route::get('/getcheckerId', [ResponsibilitiesController::class, 'getResponsibilities']);
     Route::get('/user', [\App\Http\Controllers\AuthController::class, 'User']);

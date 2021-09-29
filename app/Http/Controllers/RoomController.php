@@ -73,7 +73,7 @@ class RoomController extends Controller
             throw new Exception('invalid setRoom');
 
         //Todo: ตรวจสอบสิทธิ์ ของ checker
-        if ($this->is_checker(array($is_checker->create_by), Auth::user()->id) == 0)
+        if ($this->is_checker(array($is_checker->create_by), Auth::user()->id))
             throw new Exception('Unauthenticated.');
 
 
